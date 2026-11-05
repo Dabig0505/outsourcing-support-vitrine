@@ -28,7 +28,7 @@ SetEnvIfNoCase Host \.hosting\.ovh\.net$ RECETTE=1
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+  Header always set Strict-Transport-Security "max-age=86400" env=HTTPS
 </IfModule>
 
 # --- Cache des assets ---
