@@ -1,0 +1,42 @@
+# Outsourcing Support — vitrine statique (production + recette dans le même dossier)
+Options -Indexes
+AddDefaultCharset utf-8
+
+# --- Recette : jamais indexée, quel que soit le contenu des pages ---
+SetEnvIfNoCase Host ^recette\. RECETTE=1
+SetEnvIfNoCase Host \.hosting\.ovh\.net$ RECETTE=1
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow" env=RECETTE
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Recette / adresse technique : robots.txt bloquant
+  RewriteCond %{ENV:RECETTE} =1
+  RewriteRule ^robots\.txt$ /robots-recette.txt [L]
+
+  # Production : HTTPS + www -> apex (301)
+  RewriteCond %{HTTP_HOST} ^(www\.)?outsourcing-support\.com$ [NC]
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^(.*)$ https://outsourcing-support.com/$1 [R=301,L]
+</IfModule>
+
+# --- En-têtes de sécurité (site statique, sans iframe) ---
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+</IfModule>
+
+# --- Cache des assets ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType font/ttf "access plus 365 days"
+</IfModule>
